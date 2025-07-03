@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>سجل مشورة الأطفال</title>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+</head>
+<body dir="rtl" style="font-family: Arial; padding: 30px">
+
+  <h2>نموذج تسجيل بيانات الأمهات</h2>
+
+  <form id="momForm">
+    <label>اسم الأم:</label><br />
+    <input type="text" id="name" required><br /><br />
+
+    <label>الرقم القومي:</label><br />
+    <input type="text" id="nid" required><br /><br />
+
+    <label>رقم الموبايل:</label><br />
+    <input type="text" id="phone" required><br /><br />
+
+    <button type="submit">➕ إضافة</button>
+  </form>
+
+  <br />
+  <button id="downloadBtn" style="display:none;">📥 تحميل Excel</button>
+
+  <h3>📝 البيانات المدخلة:</h3>
+  <ul id="dataList"></ul>
+
+  <script>
+    const dataList = [];
+    const listElement = document.getElementById("dataList");
+    const form = document.getElementById("momForm");
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const nid = document.getElementById("nid").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+
+      if (!name || !nid || !phone) {
+        alert("من فضلك أدخل كل البيانات");
+        return;
+      }
+
+      // أضف البيانات للمصفوفة
+      dataList.push([name, nid, phone]);
+
+      // أضف للواجهة
+      const li = document.createElement("li");
+      li.textContent = `👩‍🦱 ${name} | 🪪 ${nid} | 📱 ${phone}`;
+      listElement.appendChild(li);
+
+      // أظهر زر التحميل
+      downloadBtn.style.display = "inline-block";
+
+      // مسح الحقول
+      form.reset();
+    });
+
+    downloadBtn.addEventListener("click", function () {
+      const headers = ["اسم الأم", "الرقم القومي", "رقم الموبايل"];
+      const ws_data = [headers, ...dataList];
+
+      const worksheet = XLSX.utils.aoa_to_sheet(ws_data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "سجل مشورة الأطفال");
+
+      const wbout = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+      const blob = new Blob([wbout], { type: "application/octet-stream" });
+
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "سجل_مشورة.xlsx";
+      a.click();
+    });
+  </script>
+
+</body>
+</html>
